@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Restaurant Finder</title>
+</head>
+<body>
+    <h1>Find Restaurants</h1>
+
+    <!-- Form to input location -->
+    <form action="/restaurants" method="POST">
+        <label for="location">Enter a Location:</label>
+        <input type="text" id="location" name="location" required>
+        <button type="submit">Search</button>
+    </form>
+
+    {% if restaurants %}
+        <h2>Restaurants in {{ location }}</h2>
+        <ul>
+            {% for restaurant in restaurants %}
+                <li>{{ restaurant }}</li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+</body>
+</html>
