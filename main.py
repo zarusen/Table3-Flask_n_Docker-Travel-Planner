@@ -1,6 +1,6 @@
 import requests
 import os
-
+#OLD CODE FOR REFERENCE
 def get_lat_lng(api_key, city_name):
     geocode_url = "https://maps.googleapis.com/maps/api/geocode/json"
     
