@@ -3,25 +3,54 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Restaurant Finder</title>
+    <title>Find Restaurants and Attractions</title>
 </head>
 <body>
-    <h1>Find Restaurants</h1>
+    <h1>Find Restaurants and Attractions</h1>
 
     <!-- Form to input location -->
-    <form action="/restaurants" method="POST">
+    <form action="/places" method="POST">
         <label for="location">Enter a Location:</label>
         <input type="text" id="location" name="location" required>
         <button type="submit">Search</button>
     </form>
 
-    {% if restaurants %}
-        <h2>Restaurants in {{ location }}</h2>
-        <ul>
-            {% for restaurant in restaurants %}
-                <li>{{ restaurant }}</li>
-            {% endfor %}
-        </ul>
+    {% if restaurants or attractions %}
+        <h2>Information for {{ location }}:</h2>
+        
+        {% if restaurants %}
+            <h3>Top Restaurants in {{ location }}:</h3>
+            <ul>
+                {% for restaurant in restaurants %}
+                    <li>
+                        <strong>{{ restaurant.name }}</strong><br>
+                        Rating: {{ restaurant.rating }}<br>
+                        Address: {{ restaurant.address }}
+                    </li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <p>No restaurants found in {{ location }}.</p>
+        {% endif %}
+
+        {% if attractions %}
+            <h3>Top Attractions in {{ location }}:</h3>
+            <ul>
+                {% for attraction in attractions %}
+                    <li>
+                        <strong>{{ attraction.name }}</strong><br>
+                        Rating: {{ attraction.rating }}<br>
+                        Address: {{ attraction.address }}
+                    </li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <p>No attractions found in {{ location }}.</p>
+        {% endif %}
+
+    {% elif request.method == 'POST' %}
+        <!-- If the form was submitted but no results were found -->
+        <p>No results found for "{{ location }}". Please try again with a different location.</p>
     {% endif %}
 </body>
 </html>
