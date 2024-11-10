@@ -10,45 +10,70 @@ GOOGLE_PLACES_TEXTSEARCH_URL = 'https://maps.googleapis.com/maps/api/place/texts
 @app.route('/', methods=['GET'])
 def index():
     # Render the form for the user to input the location
-    return render_template('index.html', restaurants=None)
+    return render_template('index.html', restaurants=None, attractions=None)
 
-@app.route('/restaurants', methods=['POST'])
-def get_restaurants():
+@app.route('/places', methods=['POST'])
+def get_places():
     location = request.form.get('location')  # Get the location from the form
 
     if not location:
         return redirect(url_for('index'))  # If no location is entered, redirect back to the form
 
-    # Build the query string for the Places API
-    query = f"restaurants in {location}"
+    # Build the queries for both restaurants and attractions
+    restaurant_query = f"restaurants in {location}"
+    attraction_query = f"tourist attractions in {location}"
 
     # Parameters for Google Places Text Search API
     params = {
-        'query': query,
         'key': GOOGLE_API_KEY
     }
 
-    # Make the request to the Google Places Text Search API
-    response = requests.get(GOOGLE_PLACES_TEXTSEARCH_URL, params=params)
+    # Fetch restaurants
+    restaurant_params = params.copy()
+    restaurant_params['query'] = restaurant_query
+    restaurant_response = requests.get(GOOGLE_PLACES_TEXTSEARCH_URL, params=restaurant_params)
 
-    if response.status_code != 200:
-        return jsonify({"error": "Error fetching data from Google Places API."}), 500
+    # Check if request is successful for restaurants
+    if restaurant_response.status_code != 200:
+        return render_template('index.html', error="Error fetching data for restaurants.", restaurants=None, attractions=None)
 
-    data = response.json()
+    restaurant_data = restaurant_response.json()
 
-    if 'results' not in data or len(data['results']) == 0:
-        return render_template('index.html', restaurants=[], location=location)
+    # Extract restaurant details (name, address, rating)
+    restaurants = []
+    if 'results' in restaurant_data:
+        for place in restaurant_data['results'][:5]:  # Limit to 5 restaurants
+            restaurant = {
+                'name': place.get('name'),
+                'address': place.get('formatted_address'),
+                'rating': place.get('rating', 'N/A')
+            }
+            restaurants.append(restaurant)
 
-    # Extract the names of the first 5 restaurants
-    restaurant_names = [place.get('name') for place in data['results'][:5]]
+    # Fetch attractions
+    attraction_params = params.copy()
+    attraction_params['query'] = attraction_query
+    attraction_response = requests.get(GOOGLE_PLACES_TEXTSEARCH_URL, params=attraction_params)
 
-    # Render the template with the restaurant names
-    return render_template('index.html', restaurants=restaurant_names, location=location)
+    # Check if request is successful for attractions
+    if attraction_response.status_code != 200:
+        return render_template('index.html', error="Error fetching data for attractions.", restaurants=None, attractions=None)
 
+    attraction_data = attraction_response.json()
+
+    # Extract attraction details (name, address, rating)
+    attractions = []
+    if 'results' in attraction_data:
+        for place in attraction_data['results'][:5]:  # Limit to 5 attractions
+            attraction = {
+                'name': place.get('name'),
+                'address': place.get('formatted_address'),
+                'rating': place.get('rating', 'N/A')
+            }
+            attractions.append(attraction)
+
+    # Render the template with both restaurants and attractions
+    return render_template('index.html', restaurants=restaurants, attractions=attractions, location=location)
 
 if __name__ == '__main__':
-    app.run(
-        debug=True,
-        host='0.0.0.0',
-        port=5000
-    )
+    app.run(debug=True, host='0.0.0.0', port=5000)
