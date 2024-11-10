@@ -34,9 +34,9 @@ jobs:
         with:
           ssh-private-key: ${{ secrets.EC2_KEY }}
 
-      - name: Copy docker-compose file to EC2
+      - name: Copy docker-image file to EC2
         run: |
-          scp -o StrictHostKeyChecking=no docker-compose.yml ${{ secrets.EC2_USER }}@${{ secrets.EC2_INSTANCE_HOST }}:/home/${{ secrets.EC2_USER }}/docker-compose.yml
+          scp -o StrictHostKeyChecking=no docker-image.yml ${{ secrets.EC2_USER }}@${{ secrets.EC2_INSTANCE_HOST }}:/home/${{ secrets.EC2_USER }}/docker-image.yml
 
       - name: SSH into EC2 and deploy
         run: |

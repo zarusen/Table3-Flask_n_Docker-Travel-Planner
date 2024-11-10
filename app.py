@@ -7,6 +7,7 @@ app = Flask(__name__)
 GOOGLE_API_KEY = 'AIzaSyA4witeIUyn2Zu9cnEodZw698Y7qcgUquk'
 GOOGLE_PLACES_TEXTSEARCH_URL = 'https://maps.googleapis.com/maps/api/place/textsearch/json'
 
+
 # OpenWeather API key (replace with your actual OpenWeather API key)
 OPENWEATHER_API_KEY = '6780e6a80eefe5dc6aca5dc07a8d416b'
 OPENWEATHER_URL = 'http://api.openweathermap.org/data/2.5/weather'
@@ -44,6 +45,7 @@ def index():
     # Render the form for the user to input the location
     return render_template('index.html', restaurants=None, attractions=None, weather=None)
 
+
 @app.route('/places', methods=['POST'])
 def get_places():
     location = request.form.get('location')  # Get the location from the form
@@ -53,7 +55,9 @@ def get_places():
 
     # Build the queries for both restaurants and attractions
     restaurant_query = f"restaurants in {location}"
+
     attraction_query = f"attractions in {location}"
+
 
     # Parameters for Google Places Text Search API
     params = {
@@ -67,7 +71,9 @@ def get_places():
 
     # Check if request is successful for restaurants
     if restaurant_response.status_code != 200:
+
         return render_template('index.html', error="Error fetching data for restaurants.", restaurants=None, attractions=None, weather=None)
+
 
     restaurant_data = restaurant_response.json()
 
@@ -89,7 +95,9 @@ def get_places():
 
     # Check if request is successful for attractions
     if attraction_response.status_code != 200:
+
         return render_template('index.html', error="Error fetching data for attractions.", restaurants=None, attractions=None, weather=None)
+
 
     attraction_data = attraction_response.json()
 
@@ -109,6 +117,7 @@ def get_places():
 
     # Render the template with restaurants, attractions, and weather
     return render_template('index.html', restaurants=restaurants, attractions=attractions, location=location, weather=weather)
+
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=5000)
