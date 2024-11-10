@@ -15,6 +15,16 @@
         <button type="submit">Search</button>
     </form>
 
+    {% if weather %}
+        <!-- Display weather info if available -->
+        <h2>Weather in {{ weather.city }}:</h2>
+        <p>Temperature: {{ weather.temperature }}°F</p>
+        <p>Description: {{ weather.description }}</p>
+        <p>Humidity: {{ weather.humidity }}%</p>
+        <p>Wind Speed: {{ weather.wind_speed }} m/s</p>
+    {% endif %}
+
+
     {% if restaurants or attractions %}
         <h2>Information for {{ location }}:</h2>
         

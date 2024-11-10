@@ -7,10 +7,44 @@ app = Flask(__name__)
 GOOGLE_API_KEY = 'AIzaSyA4witeIUyn2Zu9cnEodZw698Y7qcgUquk'
 GOOGLE_PLACES_TEXTSEARCH_URL = 'https://maps.googleapis.com/maps/api/place/textsearch/json'
 
+
+# OpenWeather API key (replace with your actual OpenWeather API key)
+OPENWEATHER_API_KEY = '6780e6a80eefe5dc6aca5dc07a8d416b'
+OPENWEATHER_URL = 'http://api.openweathermap.org/data/2.5/weather'
+
+# Function to fetch weather data from OpenWeather API
+def fetch_weather(location, api_key):
+    params = {
+        'q': location,
+        'appid': api_key,
+        'units': 'imperial'  # Get temperature in Fahrenheit
+    }
+
+    response = requests.get(OPENWEATHER_URL, params=params)
+
+    if response.status_code != 200:
+        return None  # If there's an error with the API, return None
+
+    data = response.json()
+
+    if data.get('cod') != 200:
+        return None  # If the API responds with an error message
+
+    weather = {
+        'city': data['name'],
+        'temperature': data['main']['temp'],
+        'description': data['weather'][0]['description'],
+        'humidity': data['main']['humidity'],
+        'wind_speed': data['wind']['speed']
+    }
+    
+    return weather
+
 @app.route('/', methods=['GET'])
 def index():
     # Render the form for the user to input the location
-    return render_template('index.html', restaurants=None, attractions=None)
+    return render_template('index.html', restaurants=None, attractions=None, weather=None)
+
 
 @app.route('/places', methods=['POST'])
 def get_places():
@@ -21,7 +55,9 @@ def get_places():
 
     # Build the queries for both restaurants and attractions
     restaurant_query = f"restaurants in {location}"
-    attraction_query = f"tourist attractions in {location}"
+
+    attraction_query = f"attractions in {location}"
+
 
     # Parameters for Google Places Text Search API
     params = {
@@ -35,7 +71,9 @@ def get_places():
 
     # Check if request is successful for restaurants
     if restaurant_response.status_code != 200:
-        return render_template('index.html', error="Error fetching data for restaurants.", restaurants=None, attractions=None)
+
+        return render_template('index.html', error="Error fetching data for restaurants.", restaurants=None, attractions=None, weather=None)
+
 
     restaurant_data = restaurant_response.json()
 
@@ -57,7 +95,9 @@ def get_places():
 
     # Check if request is successful for attractions
     if attraction_response.status_code != 200:
-        return render_template('index.html', error="Error fetching data for attractions.", restaurants=None, attractions=None)
+
+        return render_template('index.html', error="Error fetching data for attractions.", restaurants=None, attractions=None, weather=None)
+
 
     attraction_data = attraction_response.json()
 
@@ -72,8 +112,12 @@ def get_places():
             }
             attractions.append(attraction)
 
-    # Render the template with both restaurants and attractions
-    return render_template('index.html', restaurants=restaurants, attractions=attractions, location=location)
+    # Fetch weather data
+    weather = fetch_weather(location, OPENWEATHER_API_KEY)
+
+    # Render the template with restaurants, attractions, and weather
+    return render_template('index.html', restaurants=restaurants, attractions=attractions, location=location, weather=weather)
+
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=5000)
