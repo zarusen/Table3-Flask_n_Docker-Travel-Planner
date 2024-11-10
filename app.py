@@ -45,6 +45,17 @@ def fetch_weather(location, api_key):
     }
     
     return weather
+    
+    # Function to get public IP address of the device
+def get_public_ip():
+    try:
+        # Using an external API to get public IP
+        response = requests.get('https://api.ipify.org?format=json')
+        ip = response.json().get('ip')
+        return ip
+    except requests.exceptions.RequestException as e:
+        print(f"Error getting public IP: {e}")
+        return None
 
 @app.route('/', methods=['GET'])
 def index():
@@ -118,4 +129,11 @@ def get_places():
     return render_template('index.html', restaurants=restaurants, attractions=attractions, location=location, weather=weather)
 
 if __name__ == '__main__':
-    app.run(debug=True, host='0.0.0.0', port=5000)
+    public_ip = get_public_ip()
+
+    if public_ip:
+        print(f"Starting Flask app on public IP address {public_ip}")
+        app.run(debug=True, host=public_ip, port=5000)
+    else:
+        print("Could not retrieve public IP address. Using 0.0.0.0 instead.")
+        app.run(debug=True, host='0.0.0.0', port=5000)
