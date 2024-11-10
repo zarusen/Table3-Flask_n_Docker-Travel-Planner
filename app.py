@@ -1,16 +1,23 @@
+import os
 from flask import Flask, render_template, request, redirect, url_for
 import requests
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+load_dotenv()
 
 app = Flask(__name__)
 
-# Google Places API key (replace with your actual API key)
-GOOGLE_API_KEY = 'AIzaSyA4witeIUyn2Zu9cnEodZw698Y7qcgUquk'
+# Access API keys from environment variables
+GOOGLE_API_KEY = os.environ.get('REST_API_KEY')
+OPENWEATHER_API_KEY = os.environ.get('WEA_API_KEY')
+
+# If keys are missing, raise an error (optional but recommended)
+if not GOOGLE_API_KEY or not OPENWEATHER_API_KEY:
+    raise ValueError("API keys are not set. Please check your environment variables.")
+
 GOOGLE_PLACES_TEXTSEARCH_URL = 'https://maps.googleapis.com/maps/api/place/textsearch/json'
-
-# OpenWeather API key (replace with your actual OpenWeather API key)
-OPENWEATHER_API_KEY = '6780e6a80eefe5dc6aca5dc07a8d416b'
 OPENWEATHER_URL = 'http://api.openweathermap.org/data/2.5/weather'
-
 # Function to fetch weather data from OpenWeather API
 def fetch_weather(location, api_key):
     params = {
