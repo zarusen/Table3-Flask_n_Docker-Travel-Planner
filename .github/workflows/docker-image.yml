@@ -42,6 +42,8 @@ jobs:
         run: |
           ssh -o StrictHostKeyChecking=no ${{ secrets.EC2_USER }}@${{ secrets.EC2_INSTANCE_HOST }} << 'EOF'
             docker pull zarusen2/travel-app:latest
-            docker run -d -p 80:80 zarusen2/travel-app:latest
+          
+            docker-compose down
+            docker-compose up -d
             
           EOF
