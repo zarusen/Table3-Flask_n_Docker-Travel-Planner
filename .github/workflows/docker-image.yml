@@ -34,21 +34,21 @@ jobs:
         with:
           ssh-private-key: ${{ secrets.EC2_KEY }}
 
-      - name: Copy docker-image file to EC2
+      - name: Pull the latest Docker image on EC2
         run: |
           ssh -o StrictHostKeyChecking=no ${{ secrets.EC2_USER }}@${{ secrets.EC2_INSTANCE_HOST }} "docker pull zarusen2/travel-app:latest"
 
       - name: Stop and Remove Existing Container
         run: |
           ssh -o StrictHostKeyChecking=no ${{ secrets.EC2_USER }}@${{ secrets.EC2_INSTANCE_HOST }} << 'EOF'
-            docker stop travel-app || true
-            docker rm travel-app || true
+            if [ $(docker ps -aq -f name=travel-app) ]; then
+              docker stop travel-app
+              docker rm travel-app
+            fi
           EOF
 
       - name: Run New Container
         run: |
           ssh -o StrictHostKeyChecking=no ${{ secrets.EC2_USER }}@${{ secrets.EC2_INSTANCE_HOST }} << 'EOF'
             docker run -d --name travel-app -p 80:80 zarusen2/travel-app:latest
-          EOFF
-
- 
+          EOF
